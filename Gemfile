@@ -17,8 +17,15 @@ def manageiq_plugin(plugin_name)
   end
 end
 
-manageiq_plugin "manageiq-providers-ansible_tower" # can't move this down yet, because we can't autoload ManageIQ::Providers::AnsibleTower::Shared
-manageiq_plugin "manageiq-schema"
+
+def c2c_manageiq_plugin(plugin_name, branch_name)
+  unless dependencies.detect { |d| d.name == plugin_name }
+    gem plugin_name, :git => "https://github.com/Click2Cloud/#{plugin_name}", :branch => branch_name
+  end
+end
+
+manageiq_plugin "manageiq-providers-ansible_tower"
+c2c_manageiq_plugin "manageiq-schema", "dev"
 
 # Unmodified gems
 gem "activerecord-id_regions",        "~>0.2.0"
@@ -83,6 +90,15 @@ gem "american_date"
 # This default is used to automatically require all of our gems in processes that don't specify which bundler groups they want.
 #
 ### providers
+
+#gem "manageiq-providers-telefonica" ,:require=>false, :git=>"https://github.com/click2cloud/manageiq-providers-telefonica.git", :branch=>"dev-aniket"
+#c2c_manageiq_plugin "manageiq-providers-telefonica", "master"
+gem 'manageiq-providers-telefonica', :path => '../manageiq-providers-telefonica'
+
+group :openstack, :manageiq_default do
+  manageiq_plugin "manageiq-providers-openstack"
+end
+
 group :amazon, :manageiq_default do
   manageiq_plugin "manageiq-providers-amazon"
   gem "amazon_ssa_support",                          :require => false, :git => "https://github.com/ManageIQ/amazon_ssa_support.git", :branch => "master" # Temporary dependency to be moved to manageiq-providers-amazon when officially release
@@ -128,10 +144,6 @@ end
 group :openshift, :manageiq_default do
   manageiq_plugin "manageiq-providers-openshift"
   gem "htauth",                         "2.0.0",         :require => false # used by container deployment
-end
-
-group :openstack, :manageiq_default do
-  manageiq_plugin "manageiq-providers-openstack"
 end
 
 group :ovirt, :manageiq_default do
@@ -191,13 +203,13 @@ end
 
 group :ui_dependencies do # Added to Bundler.require in config/application.rb
   manageiq_plugin "manageiq-decorators"
-  manageiq_plugin "manageiq-ui-classic"
+  c2c_manageiq_plugin "manageiq-ui-classic", "dev-telefonica"
   # Modified gems (forked on Github)
   gem "jquery-rjs",                   "=0.1.1",                       :git => "https://github.com/ManageIQ/jquery-rjs.git", :tag => "v0.1.1-1"
 end
 
 group :v2v, :ui_dependencies do
-  manageiq_plugin "manageiq-v2v"
+  gem "manageiq-v2v", :git => "https://github.com/ManageIQ/miq_v2v_ui_plugin.git", :branch => "master"
 end
 
 group :web_server, :manageiq_default do
@@ -275,3 +287,6 @@ end
 # Load other additional Gemfiles
 #   Developers can create a file ending in .rb under bundler.d/ to specify additional development dependencies
 Dir.glob(File.join(__dir__, 'bundler.d/*.rb')).each { |f| eval_gemfile(File.expand_path(f, __dir__)) }
+
+# Added at 2018-08-29 23:12:07 +0530 by root:
+# gem "fog-telefonica", "~> 0.1.27", :require => false, :git => "https://github.com/Click2Cloud/fog-telefonica", :branch => "master"

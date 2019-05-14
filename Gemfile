@@ -20,12 +20,12 @@ end
 
 def c2c_manageiq_plugin(plugin_name, branch_name)
   unless dependencies.detect { |d| d.name == plugin_name }
-    gem plugin_name, :git => "https://github.com/Click2Cloud/#{plugin_name}", :branch => branch_name
+    gem plugin_name, :git => "https://github.com/c2c-miq-telefonica/#{plugin_name}", :branch => branch_name
   end
 end
 
 manageiq_plugin "manageiq-providers-ansible_tower"
-c2c_manageiq_plugin "manageiq-schema", "dev"
+c2c_manageiq_plugin "manageiq-schema", "dev-bkp-040219"
 
 # Unmodified gems
 gem "activerecord-id_regions",        "~>0.2.0"
@@ -89,10 +89,7 @@ gem "american_date"
 # Make sure to tag your new bundler group with the manageiq_default group in addition to your specific bundler group name.
 # This default is used to automatically require all of our gems in processes that don't specify which bundler groups they want.
 #
-### providers
-
-#gem "manageiq-providers-telefonica" ,:require=>false, :git=>"https://github.com/click2cloud/manageiq-providers-telefonica.git", :branch=>"dev-aniket"
-#c2c_manageiq_plugin "manageiq-providers-telefonica", "master"
+### provider
 gem 'manageiq-providers-telefonica', :path => '../manageiq-providers-telefonica'
 
 group :openstack, :manageiq_default do
@@ -202,7 +199,7 @@ group :consumption, :manageiq_default do
 end
 
 group :ui_dependencies do # Added to Bundler.require in config/application.rb
-  c2c_manageiq_plugin "manageiq-ui-classic", "dev-telefonica"
+  c2c_manageiq_plugin "manageiq-ui-classic", "dev-telefonica-bkp-040219"
   # Modified gems (forked on Github)
   gem "jquery-rjs",                   "=0.1.1",                       :git => "https://github.com/ManageIQ/jquery-rjs.git", :tag => "v0.1.1-1"
 end
